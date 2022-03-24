@@ -1,0 +1,70 @@
+<html>
+<head>
+    <title>LED点灯ページ</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+
+<body>
+    <button type="button" class="btn btn-primary" onclick="set_color(0);">0</button>
+    <button type="button" class="btn btn-secondary" onclick="set_color(1);">1</button>
+    <button type="button" class="btn btn-success" onclick="set_color(2);">2</button>
+    <button type="button" class="btn btn-danger" onclick="set_color(3);">3</button>
+    <button type="button" class="btn btn-warning" onclick="set_color(4);">4</button>
+    <button type="button" class="btn btn-info" onclick="set_color(5);">5</button>
+    <button type="button" class="btn btn-light" onclick="set_color(6);">6</button>
+    <button type="button" class="btn btn-dark" onclick="set_color(7);">7</button>
+</body>
+
+<script>
+
+SET_COLOR_ENDPOINT='http://192.168.11.23:5000/set_color'
+var target_data = null;
+
+function set_color_result()
+{
+    console.log(target_data);
+}
+function set_color(code)
+{
+    //POSTリクエストを行う    
+    var data =
+    {
+        "color": code
+    };
+    console.log(code);
+
+    postRequest(SET_COLOR_ENDPOINT, data, set_color_result, true);
+}
+function postRequest(url, data, callback, jsonflag=false)
+{
+    var xhrReq = new XMLHttpRequest();
+    xhrReq.onreadystatechange = function() 
+    {
+        if (xhrReq.readyState == 4 && xhrReq.status == 200) 
+        {
+            // 取得成功
+            var ret = xhrReq.responseText;
+            target_data = ret;
+            callback();
+        }else{
+            //取得失敗または状態遷移段階の処理
+        }
+    };
+    xhrReq.open("POST", url, true);
+
+    //リクエストデータに合わせてどちらか使う
+    if(jsonflag)
+    {
+        //(1) jsonをPOSTする場合
+        xhrReq.setRequestHeader("Content-Type", "application/json");
+        xhrReq.send(JSON.stringify(data));  
+    }else{
+        //(2) URLエンコードした文字列をPOSTする場合
+        xhrReq.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+        xhrReq.send(data);
+    }
+
+}
+</script>
+</html>
